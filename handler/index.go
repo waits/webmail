@@ -1,4 +1,4 @@
-// Package handler holds HTTP request handlers
+// Package handler implements HTTP request handlers.
 package handler
 
 import (
@@ -11,6 +11,7 @@ import (
 
 const staticBase = "static/"
 
+// Index serves the home page.
 func Index(w http.ResponseWriter, r *http.Request) {
 	log.Printf("%s %s %s", r.RemoteAddr, r.Method, r.URL.Path)
 	if r.URL.Path != "/" {
@@ -20,11 +21,13 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	template.Render(w, "index.html", nil)
 }
 
+// Compose serves the compose mail page.
 func Compose(w http.ResponseWriter, r *http.Request) {
 	log.Printf("%s %s %s", r.RemoteAddr, r.Method, r.URL.Path)
 	template.Render(w, "compose.html", nil)
 }
 
+// Static serves static files.
 func Static(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, staticBase + filepath.Base(r.URL.Path))
 }

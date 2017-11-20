@@ -1,4 +1,4 @@
-// Command webmail runs a webmail server over HTTPS
+// Command webmail runs a webmail server over HTTPS.
 package main
 
 import (
