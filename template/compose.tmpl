@@ -1,0 +1,8 @@
+{{define "title"}}Compose{{end}}
+{{define "content"}}
+  <form action="/send" method="post">
+    <input name="to" placeholder="To:">
+    <textarea name="body" placeholder="Body"></textarea>
+    <button type="submit">Submit</button>
+  </form>
+{{end}}
