@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"path/filepath"
 
+	"github.com/waits/webmail/maildir"
 	"github.com/waits/webmail/template"
 )
 
@@ -18,7 +19,8 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	template.Render(w, "index.html", nil)
+
+	template.Render(w, "index.html", maildir.Messages)
 }
 
 // Compose serves the compose mail page.
@@ -29,5 +31,5 @@ func Compose(w http.ResponseWriter, r *http.Request) {
 
 // Static serves static files.
 func Static(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, staticBase + filepath.Base(r.URL.Path))
+	http.ServeFile(w, r, staticBase+filepath.Base(r.URL.Path))
 }

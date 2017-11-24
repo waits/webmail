@@ -1,7 +1,10 @@
 {{define "title"}}Inbox{{end}}
 {{define "content"}}
   <ol>
-    <li class="preview"><a href="/mail/1">Sample message 1</a></li>
-    <li class="preview"><a href="/mail/2">Sample message 2</a></li>
+    {{range $index, $ := .}}
+      <li class="preview"><a href="/mail/{{$index}}">{{ .From.Address }} {{ .Subject }}</a></li>
+    {{else}}
+      <li>No messages</li>
+    {{end}}
   </ul>
 {{end}}
