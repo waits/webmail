@@ -1,8 +1,8 @@
 {{define "title"}}Inbox{{end}}
 {{define "content"}}
   <ol>
-    {{range $index, $ := .}}
-      <li class="preview"><a href="/mail/{{$index}}">{{ .From.Address }} {{ .Subject }}</a></li>
+    {{range .}}
+      <li class="preview"><a href="/mail/{{.ID}}">{{ .From.Address }} {{ .Subject }}</a></li>
     {{else}}
       <li>No messages</li>
     {{end}}

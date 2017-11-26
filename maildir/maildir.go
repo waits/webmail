@@ -2,6 +2,9 @@
 package maildir
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"io/ioutil"
 	"log"
 	"net/mail"
 	"os"
@@ -9,23 +12,26 @@ import (
 	"time"
 )
 
+// Message represents a single mail message.
 type Message struct {
 	Date    time.Time
+	ID      string
 	From    mail.Address
 	To      mail.Address
 	Subject string
 	Body    string
 }
 
-var Messages []*Message
+// Messages is a map of IDs to messages.
+var Messages map[string]*Message
 
 func init() {
 	mails, err := filepath.Glob("etc/mail/*:*")
 	if err != nil {
 		log.Panicf("error reading maildir: %s", err)
 	}
-	Messages = make([]*Message, len(mails))
-	for i, m := range mails {
+	Messages = make(map[string]*Message, len(mails))
+	for _, m := range mails {
 		file, err := os.Open(m)
 		if err != nil {
 			log.Panicf("error opening mail: %s", err)
@@ -34,7 +40,8 @@ func init() {
 		if err != nil {
 			log.Panicf("error parsing mail: %s", err)
 		}
-		Messages[i] = newMessage(msg)
+		message := newMessage(msg)
+		Messages[message.ID] = message
 	}
 }
 
@@ -42,9 +49,13 @@ func newMessage(msg *mail.Message) *Message {
 	date, err := msg.Header.Date()
 	from, err := msg.Header.AddressList("From")
 	to, err := msg.Header.AddressList("To")
+	body, err := ioutil.ReadAll(msg.Body)
 	if err != nil {
 		log.Panicf("error parsing header: %s", err)
 	}
 
-	return &Message{date, *from[0], *to[0], msg.Header.Get("Subject"), msg.Header.Get("Body")}
+	checksum := sha256.Sum256([]byte(msg.Header.Get("Message-ID")))
+	id := hex.EncodeToString(checksum[:8])
+
+	return &Message{date, id, *from[0], *to[0], msg.Header.Get("Subject"), string(body)}
 }

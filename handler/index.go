@@ -29,6 +29,13 @@ func Compose(w http.ResponseWriter, r *http.Request) {
 	template.Render(w, "compose.html", nil)
 }
 
+// Message serves the message detail page.
+func Message(w http.ResponseWriter, r *http.Request) {
+	log.Printf("%s %s %s", r.RemoteAddr, r.Method, r.URL.Path)
+	id := r.URL.Path[6:]
+	template.Render(w, "message.html", maildir.Messages[id])
+}
+
 // Static serves static files.
 func Static(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, staticBase+filepath.Base(r.URL.Path))
