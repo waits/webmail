@@ -33,7 +33,12 @@ func Compose(w http.ResponseWriter, r *http.Request) {
 func Message(w http.ResponseWriter, r *http.Request) {
 	log.Printf("%s %s %s", r.RemoteAddr, r.Method, r.URL.Path)
 	id := r.URL.Path[6:]
-	template.Render(w, "message.html", maildir.Messages[id])
+	msg, ok := maildir.Messages[id]
+	if ok {
+		template.Render(w, "message.html", msg)
+	} else {
+		http.NotFound(w, r)
+	}
 }
 
 // Static serves static files.
