@@ -14,6 +14,8 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
+const dir = "etc/mail"
+
 // Message represents a single mail message.
 type Message struct {
 	Date    time.Time
@@ -22,13 +24,23 @@ type Message struct {
 	To      mail.Address
 	Subject string
 	Body    string
+	path    string
 }
 
-// Messages is a map of IDs to messages.
+// Messages is a map of IDs/names to messages.
 var Messages map[string]*Message
+var fileMap map[string]*Message
 
-// fileMap is a map of filenames to message IDs.
-var fileMap map[string]string
+// DeleteMessage deletes a message from Messages and the filesystem.
+func DeleteMessage(key string) error {
+	msg, ok := Messages[key]
+	if ok {
+		delete(Messages, msg.ID)
+		delete(fileMap, msg.path)
+		return os.Remove(msg.path)
+	}
+	return nil
+}
 
 func init() {
 	watcher, err := fsnotify.NewWatcher()
@@ -46,7 +58,7 @@ func init() {
 					openMessage(event.Name)
 				case fsnotify.Remove, fsnotify.Rename:
 					log.Printf("maildir: removing %s", event.Name)
-					removeMessage(event.Name)
+					DeleteMessage(event.Name)
 				}
 			case err := <-watcher.Errors:
 				log.Println("[ERROR] maildir: watcher error:", err)
@@ -56,26 +68,26 @@ func init() {
 
 	initMessages() // FIXME: race condition?
 
-	err = watcher.Add("etc/mail")
+	err = watcher.Add(dir)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
 func initMessages() {
-	mails, err := filepath.Glob("etc/mail/*:*")
+	mails, err := filepath.Glob(dir + "/*:*")
 	if err != nil {
 		log.Fatalln("[ERROR] maildir:", err)
 	}
 	Messages = make(map[string]*Message, len(mails))
-	fileMap = make(map[string]string, len(mails))
+	fileMap = make(map[string]*Message, len(mails))
 	for _, m := range mails {
 		openMessage(m)
 	}
 }
 
-func openMessage(m string) {
-	file, err := os.Open(m)
+func openMessage(name string) {
+	file, err := os.Open(name)
 	if err != nil {
 		log.Println("[ERROR] maildir:", err)
 		return
@@ -85,20 +97,12 @@ func openMessage(m string) {
 		log.Println("[ERROR] maildir:", err)
 		return
 	}
-	message := newMessage(msg)
+	message := newMessage(msg, name)
+	fileMap[message.path] = message
 	Messages[message.ID] = message
-	fileMap[m] = message.ID // TODO: split name at colon.
 }
 
-func removeMessage(m string) {
-	id, ok := fileMap[m]
-	if ok {
-		delete(fileMap, m)
-		delete(Messages, id)
-	}
-}
-
-func newMessage(msg *mail.Message) *Message {
+func newMessage(msg *mail.Message, name string) *Message {
 	date, err := msg.Header.Date()
 	from, err := msg.Header.AddressList("From")
 	to, err := msg.Header.AddressList("To")
@@ -110,5 +114,5 @@ func newMessage(msg *mail.Message) *Message {
 	checksum := sha256.Sum256([]byte(msg.Header.Get("Message-ID")))
 	id := hex.EncodeToString(checksum[:8])
 
-	return &Message{date, id, *from[0], *to[0], msg.Header.Get("Subject"), string(body)}
+	return &Message{date, id, *from[0], *to[0], msg.Header.Get("Subject"), string(body), name}
 }

@@ -3,4 +3,5 @@
   <div><label>From:</label> <strong>{{ .From.Name }}</strong> &lt;{{ .From.Address }}&gt;</div>
   <div><label>Subject:</label> {{ .Subject }}</div>
   <div><p>{{ .Body }}</p></div>
+  <div><a href="?method=delete">Delete message</a></div>
 {{end}}
