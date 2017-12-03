@@ -10,6 +10,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/fsnotify/fsnotify"
 )
 
 // Message represents a single mail message.
@@ -25,23 +27,74 @@ type Message struct {
 // Messages is a map of IDs to messages.
 var Messages map[string]*Message
 
+// fileMap is a map of filenames to message IDs.
+var fileMap map[string]string
+
 func init() {
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	go func() {
+		for {
+			select {
+			case event := <-watcher.Events:
+				switch event.Op {
+				case fsnotify.Create, fsnotify.Write:
+					log.Printf("maildir: opening %s", event.Name)
+					openMessage(event.Name)
+				case fsnotify.Remove, fsnotify.Rename:
+					log.Printf("maildir: removing %s", event.Name)
+					removeMessage(event.Name)
+				}
+			case err := <-watcher.Errors:
+				log.Println("[ERROR] maildir: watcher error:", err)
+			}
+		}
+	}()
+
+	initMessages() // FIXME: race condition?
+
+	err = watcher.Add("etc/mail")
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func initMessages() {
 	mails, err := filepath.Glob("etc/mail/*:*")
 	if err != nil {
-		log.Panicf("error reading maildir: %s", err)
+		log.Fatalln("[ERROR] maildir:", err)
 	}
 	Messages = make(map[string]*Message, len(mails))
+	fileMap = make(map[string]string, len(mails))
 	for _, m := range mails {
-		file, err := os.Open(m)
-		if err != nil {
-			log.Panicf("error opening mail: %s", err)
-		}
-		msg, err := mail.ReadMessage(file)
-		if err != nil {
-			log.Panicf("error parsing mail: %s", err)
-		}
-		message := newMessage(msg)
-		Messages[message.ID] = message
+		openMessage(m)
+	}
+}
+
+func openMessage(m string) {
+	file, err := os.Open(m)
+	if err != nil {
+		log.Println("[ERROR] maildir:", err)
+		return
+	}
+	msg, err := mail.ReadMessage(file)
+	if err != nil {
+		log.Println("[ERROR] maildir:", err)
+		return
+	}
+	message := newMessage(msg)
+	Messages[message.ID] = message
+	fileMap[m] = message.ID // TODO: split name at colon.
+}
+
+func removeMessage(m string) {
+	id, ok := fileMap[m]
+	if ok {
+		delete(fileMap, m)
+		delete(Messages, id)
 	}
 }
 
@@ -51,7 +104,7 @@ func newMessage(msg *mail.Message) *Message {
 	to, err := msg.Header.AddressList("To")
 	body, err := ioutil.ReadAll(msg.Body)
 	if err != nil {
-		log.Panicf("error parsing header: %s", err)
+		log.Fatalln("[ERROR] maildir:", err)
 	}
 
 	checksum := sha256.Sum256([]byte(msg.Header.Get("Message-ID")))
