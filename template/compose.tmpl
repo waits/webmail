@@ -1,6 +1,7 @@
 {{define "title"}}Compose{{end}}
 {{define "content"}}
   <form action="/send" method="post">
+    <input name="from" placeholder="From:">
     <input name="to" placeholder="To:">
     <textarea name="body" placeholder="Body"></textarea>
     <button type="submit">Submit</button>

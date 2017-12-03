@@ -4,6 +4,7 @@ package handler
 import (
 	"log"
 	"net/http"
+	"net/smtp"
 	"path/filepath"
 	"strings"
 
@@ -28,6 +29,21 @@ func Index(w http.ResponseWriter, r *http.Request) {
 func Compose(w http.ResponseWriter, r *http.Request) {
 	log.Printf("%s %s %s", r.RemoteAddr, r.Method, r.URL.Path)
 	template.Render(w, "compose.html", nil)
+}
+
+// Send sends a mail message.
+func Send(w http.ResponseWriter, r *http.Request) {
+	log.Printf("%s %s %s", r.RemoteAddr, r.Method, r.URL.Path)
+	auth := smtp.PlainAuth("", "", "", "localhost")
+	from := r.FormValue("from")
+	to := strings.Split(r.FormValue("to"), ", ")
+	body := []byte(r.FormValue("body"))
+	err := smtp.SendMail("localhost:25", auth, from, to, body)
+	if err != nil {
+		http.Error(w, "failed to connect to SMTP server", http.StatusInternalServerError)
+		return
+	}
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 // Message serves the message detail page.

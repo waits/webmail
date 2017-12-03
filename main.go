@@ -16,6 +16,7 @@ func main() {
 	mux.HandleFunc("/", handler.Index)
 	mux.HandleFunc("/compose", handler.Compose)
 	mux.HandleFunc("/mail/", handler.Message)
+	mux.HandleFunc("/send", handler.Send)
 	mux.HandleFunc("/static/style.css", handler.Static)
 
 	s := &http.Server{
