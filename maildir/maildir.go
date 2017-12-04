@@ -4,7 +4,6 @@ package maildir
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"io/ioutil"
 	"log"
 	"net/mail"
 	"os"
@@ -24,8 +23,14 @@ type Message struct {
 	FromName string
 	To       []*mail.Address
 	Subject  string
-	Body     string
+	Body     Body
 	path     string
+}
+
+// Body holds multipart mail bodies for a single message.
+type Body struct {
+	Plain string
+	HTML  string
 }
 
 // Messages is a map of IDs/names to messages.
@@ -107,9 +112,9 @@ func newMessage(msg *mail.Message, name string) *Message {
 	date, err := msg.Header.Date()
 	from, err := msg.Header.AddressList("From")
 	to, err := msg.Header.AddressList("To")
-	body, err := ioutil.ReadAll(msg.Body)
+	body, err := parseBody(msg)
 	if err != nil {
-		log.Fatalln("[ERROR] maildir:", err)
+		log.Println("[ERROR] maildir:", err)
 	}
 
 	fromName := "Unknown Sender"
@@ -120,5 +125,5 @@ func newMessage(msg *mail.Message, name string) *Message {
 	checksum := sha256.Sum256([]byte(msg.Header.Get("Message-ID")))
 	id := hex.EncodeToString(checksum[:8])
 
-	return &Message{date, id, from, fromName, to, msg.Header.Get("Subject"), string(body), name}
+	return &Message{date, id, from, fromName, to, msg.Header.Get("Subject"), body, name}
 }

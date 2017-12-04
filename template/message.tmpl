@@ -24,6 +24,6 @@
       </tr>
     </tbody>
   </table>
-  <pre>{{ .Body }}</pre>
+  <pre>{{ if .Body.Plain }}{{ .Body.Plain }}{{ else }} {{ .Body.HTML }}{{ end }}</pre>
   <div><a href="?method=delete">Delete message</a></div>
 {{end}}

@@ -11,6 +11,14 @@ ol {
   list-style: none;
 }
 
+pre {
+  background-color: #fafafa;
+  border: 1px solid #ccc;
+  font-family: monospace;
+  padding: 12px;
+  white-space: pre-wrap;
+}
+
 .mail-headers th {
   text-align: right;
 }
