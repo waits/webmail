@@ -2,7 +2,7 @@
 {{define "content"}}
   <ol>
     {{range .}}
-      <li class="preview"><a href="/mail/{{.ID}}">{{ .From.Address }} {{ .Subject }}</a></li>
+      <li class="preview"><a href="/mail/{{.ID}}">{{ index .FromName }} {{ .Subject }}</a></li>
     {{else}}
       <li>No messages</li>
     {{end}}

@@ -14,17 +14,18 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-const dir = "etc/mail"
+const dir = "tmp/inbox/cur"
 
 // Message represents a single mail message.
 type Message struct {
-	Date    time.Time
-	ID      string
-	From    mail.Address
-	To      mail.Address
-	Subject string
-	Body    string
-	path    string
+	Date     time.Time
+	ID       string
+	From     []*mail.Address
+	FromName string
+	To       []*mail.Address
+	Subject  string
+	Body     string
+	path     string
 }
 
 // Messages is a map of IDs/names to messages.
@@ -111,8 +112,13 @@ func newMessage(msg *mail.Message, name string) *Message {
 		log.Fatalln("[ERROR] maildir:", err)
 	}
 
+	fromName := "Unknown Sender"
+	if len(from) > 0 {
+		fromName = from[0].Name
+	}
+
 	checksum := sha256.Sum256([]byte(msg.Header.Get("Message-ID")))
 	id := hex.EncodeToString(checksum[:8])
 
-	return &Message{date, id, *from[0], *to[0], msg.Header.Get("Subject"), string(body), name}
+	return &Message{date, id, from, fromName, to, msg.Header.Get("Subject"), string(body), name}
 }

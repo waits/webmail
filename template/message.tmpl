@@ -1,7 +1,29 @@
 {{define "title"}}Message{{end}}
 {{define "content"}}
-  <div><label>From:</label> <strong>{{ .From.Name }}</strong> &lt;{{ .From.Address }}&gt;</div>
-  <div><label>Subject:</label> {{ .Subject }}</div>
-  <div><p>{{ .Body }}</p></div>
+  <table class="mail-headers">
+    <tbody>
+      <tr>
+        <th>from</th>
+        {{ range .From }}
+          <td>{{ .Name }} &lt;{{ .Address }}&gt;</td>
+        {{ end }}
+      </tr>
+      <tr>
+        <th>to</th>
+        {{ range .To }}
+          <td>{{ .Address }}</td>
+        {{ end }}
+      </tr>
+      <tr>
+        <th>date</th>
+        <td>{{ .Date }}</td>
+      </tr>
+      <tr>
+        <th>subject</th>
+        <td>{{ .Subject }}</td>
+      </tr>
+    </tbody>
+  </table>
+  <pre>{{ .Body }}</pre>
   <div><a href="?method=delete">Delete message</a></div>
 {{end}}
