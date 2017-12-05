@@ -13,8 +13,6 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-const dir = "tmp/inbox/cur"
-
 // Message represents a single mail message.
 type Message struct {
 	Date     time.Time
@@ -48,12 +46,14 @@ func DeleteMessage(key string) error {
 	return nil
 }
 
-func init() {
+// Watch watches dir for changes and populates Messages based on received events.
+func Watch(dir string) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// Watcher event loop
 	go func() {
 		for {
 			select {
@@ -72,23 +72,24 @@ func init() {
 		}
 	}()
 
-	initMessages() // FIXME: race condition?
+	dir = filepath.Join(dir, "cur")
 
-	err = watcher.Add(dir)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func initMessages() {
-	mails, err := filepath.Glob(dir + "/*:*")
+	// Initialize Messages with dir contents
+	msgs, err := filepath.Glob(dir + "/*:*")
 	if err != nil {
 		log.Fatalln("[ERROR] maildir:", err)
 	}
-	Messages = make(map[string]*Message, len(mails))
-	fileMap = make(map[string]*Message, len(mails))
-	for _, m := range mails {
+	Messages = make(map[string]*Message, len(msgs))
+	fileMap = make(map[string]*Message, len(msgs))
+	for _, m := range msgs {
 		openMessage(m)
+	}
+
+	// Start watching dir
+	// FIXME: race condition?
+	err = watcher.Add(dir)
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 

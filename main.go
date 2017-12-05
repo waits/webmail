@@ -2,16 +2,24 @@
 package main
 
 import (
-	// "fmt"
+	"flag"
 	"log"
 	"net/http"
 
 	"github.com/waits/webmail/handler"
+	"github.com/waits/webmail/maildir"
 )
 
-const addr = ":8080"
+var (
+	addr = flag.String("addr", ":8080", "server hostname")
+	dir  = flag.String("maildir", "tmp/inbox", "directory to store certificates in")
+)
 
 func main() {
+	flag.Parse()
+
+	maildir.Watch(*dir)
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", handler.Index)
 	mux.HandleFunc("/compose", handler.Compose)
@@ -20,10 +28,10 @@ func main() {
 	mux.HandleFunc("/static/style.css", handler.Static)
 
 	s := &http.Server{
-		Addr:    addr,
+		Addr:    *addr,
 		Handler: mux,
 	}
 
-	log.Printf("Listening on %s\n", addr)
+	log.Printf("Listening on %s\n", *addr)
 	log.Fatal(s.ListenAndServe())
 }
