@@ -1,12 +1,14 @@
 package maildir
 
 import (
+	"errors"
 	"io/ioutil"
 	"log"
 	"mime"
 	"mime/multipart"
 	"mime/quotedprintable"
 	"net/mail"
+	"path/filepath"
 	"strings"
 )
 
@@ -58,4 +60,27 @@ func parseBody(msg *mail.Message) (body Body, err error) {
 	}
 
 	return
+}
+
+// Parses char flags from a maildir filename.
+func parseFlags(path string) (Flag, error) {
+	_, file := filepath.Split(path)
+	flstr := strings.Split(file, ":")
+	if len(flstr) != 2 {
+		return Flag{}, errors.New("invalid maildir filename")
+	}
+
+	flmap := make(map[rune]bool, 6)
+	for _, ch := range flstr[1] {
+		flmap[ch] = true
+	}
+
+	return Flag{
+		Draft:   flmap['D'],
+		Flagged: flmap['F'],
+		Passed:  flmap['P'],
+		Seen:    flmap['S'],
+		Replied: flmap['R'],
+		Trashed: flmap['T'],
+	}, nil
 }

@@ -32,8 +32,12 @@ pre {
   padding: 2px 0;
 }
 
-.preview * {
+.preview > a {
   display: inline-block;
   margin-right: center;
   padding: 2px 4px;
+}
+
+.preview.read > a {
+  font-weight: bold;
 }

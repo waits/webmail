@@ -22,6 +22,7 @@ type Message struct {
 	To       []*mail.Address
 	Subject  string
 	Body     Body
+	Flag     Flag
 	path     string
 }
 
@@ -29,6 +30,16 @@ type Message struct {
 type Body struct {
 	Plain string
 	HTML  string
+}
+
+// Flag holds flags parsed from maildir filenames.
+type Flag struct {
+	Draft   bool
+	Flagged bool
+	Passed  bool
+	Seen    bool
+	Replied bool
+	Trashed bool
 }
 
 // Messages is a map of IDs/names to messages.
@@ -114,6 +125,7 @@ func newMessage(msg *mail.Message, name string) *Message {
 	from, err := msg.Header.AddressList("From")
 	to, err := msg.Header.AddressList("To")
 	body, err := parseBody(msg)
+	flag, err := parseFlags(name)
 	if err != nil {
 		log.Println("[ERROR] maildir:", err)
 	}
@@ -126,5 +138,5 @@ func newMessage(msg *mail.Message, name string) *Message {
 	checksum := sha256.Sum256([]byte(msg.Header.Get("Message-ID")))
 	id := hex.EncodeToString(checksum[:8])
 
-	return &Message{date, id, from, fromName, to, msg.Header.Get("Subject"), body, name}
+	return &Message{date, id, from, fromName, to, msg.Header.Get("Subject"), body, flag, name}
 }
