@@ -32,16 +32,6 @@ type Body struct {
 	HTML  string
 }
 
-// Flag holds flags parsed from maildir filenames.
-type Flag struct {
-	Draft   bool
-	Flagged bool
-	Passed  bool
-	Seen    bool
-	Replied bool
-	Trashed bool
-}
-
 // Messages is a map of IDs/names to messages.
 var Messages map[string]*Message
 var fileMap map[string]*Message

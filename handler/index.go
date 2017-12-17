@@ -61,6 +61,7 @@ func Message(w http.ResponseWriter, r *http.Request) {
 	switch method(r) {
 	case "GET":
 		template.Render(w, "message.html", msg)
+		msg.Flag.Write('S')
 	case "DELETE":
 		maildir.DeleteMessage(msg.ID) // FIXME: handle error
 		http.Redirect(w, r, "/", http.StatusSeeOther)
