@@ -12,19 +12,21 @@ import (
 
 var (
 	addr = flag.String("addr", ":8080", "server hostname")
+	auth = flag.String("auth", "tmp/imap.passwd", "path of passwd file")
 	dir  = flag.String("maildir", "tmp/inbox", "directory to store certificates in")
 )
 
 func main() {
 	flag.Parse()
 
+	handler.LoadPasswd(*auth)
 	maildir.Watch(*dir)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", handler.Index)
-	mux.HandleFunc("/compose", handler.Compose)
-	mux.HandleFunc("/mail/", handler.Message)
-	mux.HandleFunc("/send", handler.Send)
+	mux.HandleFunc("/", handler.WithAuth(handler.Index))
+	mux.HandleFunc("/compose", handler.WithAuth(handler.Compose))
+	mux.HandleFunc("/mail/", handler.WithAuth(handler.Message))
+	mux.HandleFunc("/send", handler.WithAuth(handler.Send))
 	mux.HandleFunc("/static/style.css", handler.Static)
 
 	s := &http.Server{
