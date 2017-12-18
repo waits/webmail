@@ -8,6 +8,7 @@ import (
 	"net/mail"
 	"os"
 	"path/filepath"
+	"sort"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
@@ -36,16 +37,12 @@ type Body struct {
 var Messages map[string]*Message
 var fileMap map[string]*Message
 
-// DeleteMessage deletes a message from Messages and the filesystem.
-func DeleteMessage(key string) error {
-	msg, ok := Messages[key]
-	if ok {
-		delete(Messages, msg.ID)
-		delete(fileMap, msg.path)
-		return os.Remove(msg.path)
-	}
-	return nil
-}
+// ByDate implements sort.Interface for []Message based on the Date field.
+type ByDate []*Message
+
+func (a ByDate) Len() int           { return len(a) }
+func (a ByDate) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByDate) Less(i, j int) bool { return a[i].Date.Before(a[j].Date) }
 
 // Watch watches dir for changes and populates Messages based on received events.
 func Watch(dir string) {
@@ -92,6 +89,27 @@ func Watch(dir string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+// DeleteMessage deletes a message from Messages and the filesystem.
+func DeleteMessage(key string) error {
+	msg, ok := Messages[key]
+	if ok {
+		delete(Messages, msg.ID)
+		delete(fileMap, msg.path)
+		return os.Remove(msg.path)
+	}
+	return nil
+}
+
+// Sorted returns Messages sorted by date descending.
+func Sorted() []*Message {
+	var messages ByDate
+	for _, m := range Messages {
+		messages = append(messages, m)
+	}
+	sort.Sort(sort.Reverse(messages))
+	return messages
 }
 
 func openMessage(name string) {

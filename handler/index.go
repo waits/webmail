@@ -22,7 +22,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	template.Render(w, "index.html", maildir.Messages)
+	template.Render(w, "index.html", maildir.Sorted())
 }
 
 // Compose serves the compose mail page.
