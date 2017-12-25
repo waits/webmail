@@ -2,8 +2,8 @@
 package handler
 
 import (
+	"log"
 	"net/http"
-	"net/smtp"
 	"path/filepath"
 	"strings"
 
@@ -30,12 +30,12 @@ func Compose(w http.ResponseWriter, r *http.Request) {
 
 // Send sends a mail message.
 func Send(w http.ResponseWriter, r *http.Request) {
-	auth := smtp.PlainAuth("", "", "", "localhost")
 	from := r.FormValue("from")
 	to := strings.Split(r.FormValue("to"), ", ")
 	body := []byte(r.FormValue("body"))
-	err := smtp.SendMail("localhost:25", auth, from, to, body)
+	err := sendMail(from, to, body)
 	if err != nil {
+		log.Println("[ERROR] handler:", err)
 		http.Error(w, "failed to connect to SMTP server", http.StatusInternalServerError)
 		return
 	}
