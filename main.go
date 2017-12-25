@@ -2,18 +2,21 @@
 package main
 
 import (
+	"crypto/tls"
 	"flag"
 	"log"
 	"net/http"
 
 	"github.com/waits/webmail/handler"
 	"github.com/waits/webmail/maildir"
+	"golang.org/x/crypto/acme/autocert"
 )
 
 var (
-	addr = flag.String("addr", ":8080", "server hostname")
+	addr = flag.String("addr", ":8080", "address to listen on")
 	auth = flag.String("auth", "tmp/imap.passwd", "path of passwd file")
-	dir  = flag.String("maildir", "tmp/inbox", "directory to store certificates in")
+	dir  = flag.String("maildir", "tmp/inbox", "path of maildir")
+	host = flag.String("host", "", "server hostname")
 )
 
 func main() {
@@ -31,11 +34,20 @@ func main() {
 	mux.HandleFunc("/static/sakura.css", handler.Static)
 	mux.HandleFunc("/static/webmail.css", handler.Static)
 
+	log.Printf("Listening on %s\n", *addr)
 	s := &http.Server{
 		Addr:    *addr,
 		Handler: mux,
 	}
-
-	log.Printf("Listening on %s\n", *addr)
-	log.Fatal(s.ListenAndServe())
+	if *host != "" {
+		m := autocert.Manager{
+			Prompt:     autocert.AcceptTOS,
+			HostPolicy: autocert.HostWhitelist(*host),
+			Cache:      autocert.DirCache("certs"),
+		}
+		s.TLSConfig = &tls.Config{GetCertificate: m.GetCertificate}
+		log.Fatal(s.ListenAndServeTLS("", ""))
+	} else {
+		log.Fatal(s.ListenAndServe())
+	}
 }
