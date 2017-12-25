@@ -2,6 +2,7 @@
 package handler
 
 import (
+	"flag"
 	"log"
 	"net/http"
 	"path/filepath"
@@ -9,9 +10,12 @@ import (
 
 	"github.com/waits/webmail/maildir"
 	"github.com/waits/webmail/template"
+	"gopkg.in/gomail.v2"
 )
 
 const staticBase = "static/"
+
+var smtpHost = flag.String("smtp", "localhost", "smtp server")
 
 // Index serves the home page.
 func Index(w http.ResponseWriter, r *http.Request) {
@@ -30,15 +34,19 @@ func Compose(w http.ResponseWriter, r *http.Request) {
 
 // Send sends a mail message.
 func Send(w http.ResponseWriter, r *http.Request) {
-	from := r.FormValue("from")
-	to := strings.Split(r.FormValue("to"), ", ")
-	body := []byte(r.FormValue("body"))
-	err := sendMail(from, to, body)
-	if err != nil {
+	m := gomail.NewMessage()
+	m.SetHeader("From", r.FormValue("from"))
+	m.SetHeader("To", r.FormValue("to"))
+	m.SetHeader("Subject", r.FormValue("subject"))
+	m.SetBody("text/plain", r.FormValue("body"))
+
+	d := gomail.Dialer{Host: *smtpHost, Port: 25}
+	if err := d.DialAndSend(m); err != nil {
 		log.Println("[ERROR] handler:", err)
 		http.Error(w, "failed to connect to SMTP server", http.StatusInternalServerError)
 		return
 	}
+
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
