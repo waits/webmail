@@ -1,12 +1,11 @@
 {{define "title"}}Inbox{{end}}
 {{define "content"}}
-  <ol>
-    {{range .}}
-      <li class="preview{{ if .Flag.Not 'S' }} read{{ end }}">
-        <a href="/mail/{{.ID}}">{{ index .FromName }} {{ .Subject }}</a>
-      </li>
-    {{else}}
-      <li>No messages</li>
-    {{end}}
-  </ul>
+  {{range .}}
+    <a href="/mail/{{.ID}}" class="preview{{ if .Flag.Not 'S' }} read{{ end }}">
+      <span>{{ index .FromName }}</span>
+      <span>{{ .Subject }}</span>
+    </a>
+  {{else}}
+    <p>No messages</p>
+  {{end}}
 {{end}}

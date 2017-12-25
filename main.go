@@ -27,7 +27,9 @@ func main() {
 	mux.HandleFunc("/compose", handler.WithAuth(handler.Compose))
 	mux.HandleFunc("/mail/", handler.WithAuth(handler.Message))
 	mux.HandleFunc("/send", handler.WithAuth(handler.Send))
-	mux.HandleFunc("/static/style.css", handler.Static)
+	mux.HandleFunc("/static/normalize.css", handler.Static)
+	mux.HandleFunc("/static/sakura.css", handler.Static)
+	mux.HandleFunc("/static/webmail.css", handler.Static)
 
 	s := &http.Server{
 		Addr:    *addr,

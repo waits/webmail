@@ -1,4 +1,4 @@
-{{define "title"}}Message{{end}}
+{{define "title"}}{{ .Subject }}{{end}}
 {{define "content"}}
   <table class="mail-headers">
     <tbody>
@@ -24,6 +24,6 @@
       </tr>
     </tbody>
   </table>
+  <p><a href="?method=delete">Delete message</a></p>
   <pre>{{ if .Body.Plain }}{{ .Body.Plain }}{{ else }} {{ .Body.HTML }}{{ end }}</pre>
-  <div><a href="?method=delete">Delete message</a></div>
 {{end}}

@@ -1,9 +1,12 @@
 {{define "title"}}Compose{{end}}
 {{define "content"}}
   <form action="/send" method="post">
-    <input name="from" placeholder="From:">
-    <input name="to" placeholder="To:">
+    <input type="text" name="from" placeholder="From">
+    <br>
+    <input type="text" name="to" placeholder="To">
+    <br>
     <textarea name="body" placeholder="Body"></textarea>
+    <br>
     <button type="submit">Submit</button>
   </form>
 {{end}}
