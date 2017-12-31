@@ -3,22 +3,33 @@
 <html>
     <head>
         <title>{{template "title" .}} | Webmail</title>
-        <link rel="stylesheet" href="/static/normalize.css" type="text/css">
-        <link rel="stylesheet" href="/static/sakura.css" type="text/css">
-        <link rel="stylesheet" href="/static/webmail.css" type="text/css">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+        <link href="/static/normalize.css" rel="stylesheet" type="text/css">
+        <link href="/static/skeleton.css" rel="stylesheet" type="text/css">
+        <link href="/static/webmail.css" rel="stylesheet" type="text/css">
+        <script src="/static/webmail.js" type="text/javascript" defer></script>
     </head>
     <body>
-        <header>
-            <h1>{{ template "title" .}}</h1>
-            <p>
-                <a href="/">Inbox</a> |
-                <a href="/compose">Compose</a>
-            </p>
-        </header>
+      <div class="container">
+        <div style="margin-top: 5%"></div>
+
+        <h4>{{ template "title" .}}</h4>
+
+        <div class="navbar-spacer"></div>
+        <nav class="navbar" id="navbar">
+          <div class="container">
+            <ul class="navbar-list">
+              <li class="navbar-item"><a class="navbar-link" href="/">Inbox</a></li>
+              <li class="navbar-item"><a class="navbar-link" href="/compose">Compose</a></li>
+            </ul>
+          </div>
+        </nav>
 
         <section>
           {{template "content" .}}
         </section>
+      </div>
     </body>
 </html>
 {{end}}

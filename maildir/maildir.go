@@ -27,6 +27,11 @@ type Message struct {
 	path     string
 }
 
+// Time returns a formatted time string.
+func (m *Message) Time() string {
+	return m.Date.Local().Format("Jan 2 3:04pm")
+}
+
 // Body holds multipart mail bodies for a single message.
 type Body struct {
 	Plain string

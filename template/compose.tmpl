@@ -1,14 +1,28 @@
 {{define "title"}}Compose{{end}}
 {{define "content"}}
   <form action="/send" method="post">
-    <input type="text" name="from" placeholder="From">
-    <br>
-    <input type="text" name="to" placeholder="To">
-    <br>
-    <input type="text" name="subject" placeholder="Subject">
-    <br>
-    <textarea name="body" placeholder="Body"></textarea>
-    <br>
-    <button type="submit">Submit</button>
+    <div class="row">
+      <div class="six columns">
+        <label for="from">From</label>
+        <input class="u-full-width" type="text" name="from" placeholder="you@example.com">
+      </div>
+      <div class="six columns">
+        <label for="to">To</label>
+        <input class="u-full-width" type="text" name="to" placeholder="me@example.com">
+      </div>
+    </div>
+
+    <div class="row">
+      <label for="subject">Subject</label>
+      <input class="u-full-width" type="text" name="subject" placeholder="Hello">
+    </div>
+
+    <div class="row">
+      <label for="body">Body</label>
+      <textarea class="u-full-width" name="body" placeholder="Body" style="min-height: 95px"></textarea>
+    </div>
+
+    <button class="button-primary" type="submit">Submit</button>
+    <button type="submit" disabled>Save as draft</button>
   </form>
 {{end}}
