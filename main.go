@@ -46,6 +46,13 @@ func main() {
 			HostPolicy: autocert.HostWhitelist(*host),
 			Cache:      autocert.DirCache("certs"),
 		}
+
+		s80 := &http.Server{
+			Addr:    ":80",
+			Handler: m.HTTPHandler(nil),
+		}
+		go s80.ListenAndServe()
+
 		s.TLSConfig = &tls.Config{GetCertificate: m.GetCertificate}
 		log.Fatal(s.ListenAndServeTLS("", ""))
 	} else {
