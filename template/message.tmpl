@@ -5,7 +5,7 @@
       <tr>
         <th>from</th>
         {{ range .From }}
-          <td>{{ .Name }} &lt;{{ .Address }}&gt;</td>
+          <td>{{ if .Name}}{{ .Name }} &lt;{{ .Address }}&gt;{{ else }}{{ .Address }}{{ end }}</td>
         {{ end }}
       </tr>
       <tr>

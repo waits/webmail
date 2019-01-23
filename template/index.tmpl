@@ -3,7 +3,7 @@
   {{range .}}
     <div class="preview">
       <a href="/mail/{{.ID}}" class="{{ if .Flag.Not 'S' }}read{{ end }}">
-        <span style="width: 20%">{{ index .FromName }}</span>
+        <span style="width: 20%">{{ if .FromName }}{{ index .FromName }}{{ else}}{{ index .From 0 }}{{ end }}</span>
         <span style="width: 65%">{{ .Subject }}</span>
         <span style="width: 15%">{{ .Time }}</span>
       </a>
